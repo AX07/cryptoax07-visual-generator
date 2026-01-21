@@ -75,6 +75,11 @@ const CarouselModal: React.FC<CarouselModalProps> = ({ isOpen, onClose, result, 
                     prompt: specificPrompt 
                 } : s));
 
+                // Add delay between slides to respect rate limits
+                if (index < slides.length - 1) {
+                    await new Promise(r => setTimeout(r, 2000));
+                }
+
             } catch (e) {
                 console.error("Error generating slide", index, e);
                 // Mark as failed but keep previous state/text

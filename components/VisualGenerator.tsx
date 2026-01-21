@@ -51,6 +51,8 @@ const VisualGenerator: React.FC<VisualGeneratorProps> = ({
       // Execute sequentially to avoid rate limits
       for (const prompt of prompts) {
          await fetchImageForPrompt(prompt);
+         // Add a small safety delay between images even if sequential
+         await new Promise(r => setTimeout(r, 2000));
       }
 
     } catch (error: any) {

@@ -56,6 +56,9 @@ const CAROUSEL_SCRIPT_INSTRUCTION = `
 5. Tone: Serious, Educational, "Alpha".
 `;
 
+// Helper to pause execution
+const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 export const generateDesignPrompts = async (headline: string): Promise<DesignPrompt[]> => {
   try {
     const ai = new GoogleGenAI({ apiKey: API_KEY });
@@ -241,42 +244,61 @@ export const generateSingleCarouselPrompt = async (
     }
 }
 
-export const generateImageFromPrompt = async (prompt: string): Promise<string> => {
-  try {
-    const ai = new GoogleGenAI({ apiKey: API_KEY });
-    console.log("Generating image for prompt:", prompt.substring(0, 50) + "...");
+// Updated with Retry Logic
+export const generateImageFromPrompt = async (prompt: string, maxRetries = 3): Promise<string> => {
+  const ai = new GoogleGenAI({ apiKey: API_KEY });
+  
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`Generating image attempt ${attempt + 1}/${maxRetries + 1}...`);
+      
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash-image',
+        contents: {
+          parts: [{ text: prompt }],
+        },
+        config: {
+          imageConfig: {
+            aspectRatio: "1:1",
+          }
+        }
+      });
 
-    // Using gemini-2.5-flash-image
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-image',
-      contents: {
-        parts: [{ text: prompt }],
-      },
-      config: {
-        imageConfig: {
-          aspectRatio: "1:1",
+      for (const part of response.candidates?.[0]?.content?.parts || []) {
+        if (part.inlineData) {
+          return `data:image/png;base64,${part.inlineData.data}`;
         }
       }
-    });
+      throw new Error("No image data found in response");
 
-    for (const part of response.candidates?.[0]?.content?.parts || []) {
-      if (part.inlineData) {
-        return `data:image/png;base64,${part.inlineData.data}`;
+    } catch (error: any) {
+      console.error(`Attempt ${attempt + 1} failed:`, error.message);
+      
+      // Check for rate limit error (429)
+      const isRateLimit = error.message?.includes('429') || error.message?.includes('Rate limit') || error.status === 429;
+      
+      if (isRateLimit && attempt < maxRetries) {
+        // Exponential backoff: 2s, 4s, 8s...
+        const delayMs = 2000 * Math.pow(2, attempt);
+        console.warn(`Rate limit hit. Waiting ${delayMs}ms before retry...`);
+        await wait(delayMs);
+        continue;
       }
+      
+      // If we are out of retries or it's a different error, throw it
+      if (attempt === maxRetries) {
+          if (isRateLimit) {
+              throw new Error("Rate limit exceeded. Please wait a moment.");
+          }
+          throw error;
+      }
+      
+      // If it wasn't a rate limit error, we might want to throw immediately
+      throw error; 
     }
-    
-    throw new Error("No image data found in response");
-  } catch (error: any) {
-    console.error("Error generating image:", error);
-    if (error.message?.includes('429')) {
-        throw new Error("Rate limit exceeded. Please wait a moment.");
-    }
-    // Return a clean error message for the UI
-    if (error.message) {
-        throw new Error(error.message);
-    }
-    throw error;
   }
+  
+  throw new Error("Failed to generate image.");
 };
 
 // Helper function to get platform-specific instructions
