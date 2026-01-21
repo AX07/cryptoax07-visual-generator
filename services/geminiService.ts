@@ -1,8 +1,10 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { DesignPrompt } from "../types";
 
-// User provided API key fallback for browser environment
-const API_KEY = (typeof process !== 'undefined' && process.env?.API_KEY) || "AIzaSyCDfANidIyw-BruJ-3GlHw08QKgOsEKhlc";
+// FORCE the API key provided by the user to ensure no build-time environment variable overrides it.
+// If this works in preview but not deployed, check your Google Cloud Console "API Key Restrictions".
+// You may need to add your deployed domain (e.g. "myapp.vercel.app") to the "HTTP Referrers" list.
+const API_KEY = "AIzaSyCDfANidIyw-BruJ-3GlHw08QKgOsEKhlc";
 
 const SYSTEM_INSTRUCTION = `
 **ACT AS:** Expert Visual Director for a Luxury Media Brand (CryptoAX07).
@@ -268,6 +270,10 @@ export const generateImageFromPrompt = async (prompt: string): Promise<string> =
     console.error("Error generating image:", error);
     if (error.message?.includes('429')) {
         throw new Error("Rate limit exceeded. Please wait a moment.");
+    }
+    // Return a clean error message for the UI
+    if (error.message) {
+        throw new Error(error.message);
     }
     throw error;
   }

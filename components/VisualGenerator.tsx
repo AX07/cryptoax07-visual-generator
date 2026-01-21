@@ -77,11 +77,16 @@ const VisualGenerator: React.FC<VisualGeneratorProps> = ({
     } catch (error: any) {
       console.error("Error fetching image for prompt:", prompt.id, error);
       
+      // Extract meaningful error info (e.g. "403 Forbidden")
+      const errorMsg = error.message?.includes("403") 
+        ? "Access Denied (403). Check API Key Domain Restrictions." 
+        : error.message || "Generation Failed";
+
       setResults(prev => prev.map(item => {
         if (item.design.id === prompt.id) {
           return {
             ...item,
-            image: { ...item.image, loading: false, error: "Generation Failed" }
+            image: { ...item.image, loading: false, error: errorMsg }
           };
         }
         return item;
@@ -119,7 +124,7 @@ const VisualGenerator: React.FC<VisualGeneratorProps> = ({
         if (item.design.id === id) {
           return {
             ...item,
-            image: { ...item.image, loading: false, error: "Regeneration Failed" }
+            image: { ...item.image, loading: false, error: error.message || "Regeneration Failed" }
           };
         }
         return item;
