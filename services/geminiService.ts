@@ -2,7 +2,7 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { DesignPrompt } from "../types";
 
 // User provided API key fallback for browser environment
-const API_KEY = (typeof process !== 'undefined' && process.env?.API_KEY) || "AIzaSyAwADFBKYn2ZCBEm-igKJypAyxkJIXXOiM";
+const API_KEY = (typeof process !== 'undefined' && process.env?.API_KEY) || "AIzaSyBpJ1LcXI7HlImt5MBSu2C9GEnr1BuPdvQ";
 
 const SYSTEM_INSTRUCTION = `
 **ACT AS:** Expert Visual Director for a Luxury Media Brand (CryptoAX07).
