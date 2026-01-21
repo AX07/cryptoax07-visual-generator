@@ -242,6 +242,7 @@ export const generateSingleCarouselPrompt = async (
 export const generateImageFromPrompt = async (prompt: string): Promise<string> => {
   try {
     const ai = new GoogleGenAI({ apiKey: API_KEY });
+    console.log("Generating image for prompt:", prompt.substring(0, 50) + "...");
 
     // Using gemini-2.5-flash-image
     const response = await ai.models.generateContent({
@@ -263,8 +264,11 @@ export const generateImageFromPrompt = async (prompt: string): Promise<string> =
     }
     
     throw new Error("No image data found in response");
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error generating image:", error);
+    if (error.message?.includes('429')) {
+        throw new Error("Rate limit exceeded. Please wait a moment.");
+    }
     throw error;
   }
 };

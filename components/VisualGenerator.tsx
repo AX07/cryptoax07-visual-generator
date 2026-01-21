@@ -48,9 +48,10 @@ const VisualGenerator: React.FC<VisualGeneratorProps> = ({
       }));
       setResults(initialResults);
 
-      prompts.forEach((prompt) => {
-        fetchImageForPrompt(prompt);
-      });
+      // Execute sequentially to avoid rate limits
+      for (const prompt of prompts) {
+         await fetchImageForPrompt(prompt);
+      }
 
     } catch (error: any) {
       console.error("Failed to generate workflow:", error);
