@@ -1,6 +1,9 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { DesignPrompt } from "../types";
 
+// User provided API key fallback for browser environment
+const API_KEY = (typeof process !== 'undefined' && process.env?.API_KEY) || "AIzaSyAwADFBKYn2ZCBEm-igKJypAyxkJIXXOiM";
+
 const SYSTEM_INSTRUCTION = `
 **ACT AS:** Expert Visual Director for a Luxury Media Brand (CryptoAX07).
 
@@ -53,7 +56,7 @@ const CAROUSEL_SCRIPT_INSTRUCTION = `
 
 export const generateDesignPrompts = async (headline: string): Promise<DesignPrompt[]> => {
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey: API_KEY });
     
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
@@ -117,7 +120,7 @@ export const generateDesignPrompts = async (headline: string): Promise<DesignPro
 
 export const generateCarouselScript = async (headline: string): Promise<string[]> => {
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey: API_KEY });
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: `Generate 4 educational carousel slides for the concept: "${headline}"`,
@@ -145,7 +148,7 @@ export const generateCarouselPrompts = async (
   slides: { id: number; text: string }[]
 ): Promise<string[]> => {
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey: API_KEY });
     
     // Construct the input payload for the model
     const inputPayload = {
@@ -202,7 +205,7 @@ export const generateSingleCarouselPrompt = async (
   slideText: string
 ): Promise<string> => {
     try {
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        const ai = new GoogleGenAI({ apiKey: API_KEY });
         const inputPayload = {
             masterStyle: {
                 environment: breakdown.environment,
@@ -238,7 +241,7 @@ export const generateSingleCarouselPrompt = async (
 
 export const generateImageFromPrompt = async (prompt: string): Promise<string> => {
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey: API_KEY });
 
     // Using gemini-2.5-flash-image
     const response = await ai.models.generateContent({
@@ -322,7 +325,7 @@ const getPlatformInstruction = (platform: string): string => {
 
 export const generateSocialContent = async (topic: string, platform: string): Promise<string> => {
     try {
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        const ai = new GoogleGenAI({ apiKey: API_KEY });
         const systemInstruction = getPlatformInstruction(platform);
 
         const response = await ai.models.generateContent({
@@ -342,7 +345,7 @@ export const generateSocialContent = async (topic: string, platform: string): Pr
 
 export const refineSocialContent = async (originalContent: string, feedback: string, platform: string): Promise<string> => {
     try {
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        const ai = new GoogleGenAI({ apiKey: API_KEY });
         const systemInstruction = getPlatformInstruction(platform);
 
         const response = await ai.models.generateContent({
@@ -374,7 +377,7 @@ export const generateTrendingKeywords = async (): Promise<{
   sources: Array<{title: string, uri: string}>
 }> => {
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey: API_KEY });
     
     // Removed responseMimeType and responseSchema because they conflict with Google Search tool
     const response = await ai.models.generateContent({
@@ -433,7 +436,7 @@ export const generateTrendingKeywords = async (): Promise<{
 
 export const generateViralHooks = async (): Promise<string[]> => {
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey: API_KEY });
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: `Generate 15 highly engaging, short "Hooks" or "Titles" for Crypto/Finance content.
