@@ -1,0 +1,5 @@
+{
+  "name": "CryptoAX07 Visual Generator",
+  "description": "A viral visual design agent that generates high-contrast, cinematic crypto-themed image prompts and renders them using Gemini Pro Vision.",
+  "requestFramePermissions": []
+}
