@@ -74,13 +74,13 @@ const CAROUSEL_SCRIPT_INSTRUCTION = `
 const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 const getPlatformInstruction = (platform: string): string => {
-    const BASE_INSTRUCTION = `You are the CryptoAX07 Marketing Agent. 
+  const BASE_INSTRUCTION = `You are the CryptoAX07 Marketing Agent. 
     Tone: calm, confident, educational, mentor-like. No hype, no moonboy talk.
     Focus on: Education, Utility, Long-term thinking.`;
 
-    switch(platform) {
-        case 'instagram':
-            return `${BASE_INSTRUCTION}
+  switch (platform) {
+    case 'instagram':
+      return `${BASE_INSTRUCTION}
             **TASK:** Write a Caption for an Instagram Carousel.
             **FORMATTING RULES (CRITICAL):**
             1. **PLAIN TEXT ONLY**: Do NOT use Markdown headers (like # or ##).
@@ -96,8 +96,8 @@ const getPlatformInstruction = (platform: string): string => {
                - [Empty Line]
                - HASHTAGS: #Crypto #Education ...
             `;
-        case 'twitter':
-             return `${BASE_INSTRUCTION}
+    case 'twitter':
+      return `${BASE_INSTRUCTION}
             **TASK:** Write a Twitter/X Thread.
             **FORMATTING RULES (CRITICAL):**
             1. **PLAIN TEXT ONLY**: No Markdown headers.
@@ -105,8 +105,8 @@ const getPlatformInstruction = (platform: string): string => {
             3. **THREAD FORMAT**: Separate each tweet with "---" and number them (e.g. 1/6, 2/6).
             4. **HOOK**: The first tweet must be a strong hook.
             `;
-        case 'linkedin':
-             return `${BASE_INSTRUCTION}
+    case 'linkedin':
+      return `${BASE_INSTRUCTION}
             **TASK:** Write a LinkedIn Authority Post.
             **FORMATTING RULES (CRITICAL):**
             1. **PLAIN TEXT ONLY**: No Markdown headers.
@@ -114,16 +114,16 @@ const getPlatformInstruction = (platform: string): string => {
             3. **LAYOUT**: Professional spacing. Short paragraphs (1-2 sentences).
             4. **STRUCTURE**: Hook -> Insight/Problem -> Solution/Framework -> Takeaway -> CTA.
             `;
-        case 'blog':
-            return `${BASE_INSTRUCTION}
+    case 'blog':
+      return `${BASE_INSTRUCTION}
             **TASK:** Write a Blog Post Outline & Intro.
             **FORMATTING RULES:**
             1. **MARKDOWN ALLOWED**: Use H1, H2, H3, Bold (**text**), Italic.
             2. **STRUCTURE**: Standard blog format.
             `;
-        default:
-            return BASE_INSTRUCTION;
-    }
+    default:
+      return BASE_INSTRUCTION;
+  }
 };
 
 export default async function handler(request: Request) {
@@ -149,97 +149,97 @@ export default async function handler(request: Request) {
       case 'design-prompts': {
         const { headline } = payload;
         const response = await ai.models.generateContent({
-            model: "gemini-1.5-flash", // Reverting to stable 1.5-flash from preview
-            contents: `Generate 3 visual master prompts for the headline: "${headline}"`,
-            config: {
-              systemInstruction: SYSTEM_INSTRUCTION,
-              responseMimeType: "application/json",
-              responseSchema: {
-                type: Type.ARRAY,
-                items: {
-                  type: Type.OBJECT,
-                  properties: {
-                    id: { type: Type.INTEGER },
-                    breakdown: {
-                      type: Type.OBJECT,
-                      properties: {
-                        subject: { 
-                          type: Type.STRING, 
-                          description: "Highly detailed description of the Single Hero Object including texture, imperfections, material" 
-                        },
-                        action: { 
-                          type: Type.STRING, 
-                          description: "Description of subtle motion blur, floating particles, light spills" 
-                        },
-                        environment: { 
-                          type: Type.STRING, 
-                          description: "Background details (Dark Void), gradients, vignettes" 
-                        },
-                        styleAndTech: { 
-                          type: Type.STRING, 
-                          description: "Camera, Lighting, and Render settings" 
-                        },
-                        typographyInstruction: {
-                          type: Type.STRING,
-                          description: "Instruction for text. MUST SPECIFY: 'Bold Sans-Serif, [Keyword] in Metallic Gold, rest in White'."
-                        }
+          model: "gemini-1.5-flash", // Reverting to stable 1.5-flash from preview
+          contents: `Generate 3 visual master prompts for the headline: "${headline}"`,
+          config: {
+            systemInstruction: SYSTEM_INSTRUCTION,
+            responseMimeType: "application/json",
+            responseSchema: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  id: { type: Type.INTEGER },
+                  breakdown: {
+                    type: Type.OBJECT,
+                    properties: {
+                      subject: {
+                        type: Type.STRING,
+                        description: "Highly detailed description of the Single Hero Object including texture, imperfections, material"
                       },
-                      required: ["subject", "action", "environment", "styleAndTech", "typographyInstruction"],
+                      action: {
+                        type: Type.STRING,
+                        description: "Description of subtle motion blur, floating particles, light spills"
+                      },
+                      environment: {
+                        type: Type.STRING,
+                        description: "Background details (Dark Void), gradients, vignettes"
+                      },
+                      styleAndTech: {
+                        type: Type.STRING,
+                        description: "Camera, Lighting, and Render settings"
+                      },
+                      typographyInstruction: {
+                        type: Type.STRING,
+                        description: "Instruction for text. MUST SPECIFY: 'Bold Sans-Serif, [Keyword] in Metallic Gold, rest in White'."
+                      }
                     },
-                    fullPrompt: { 
-                      type: Type.STRING, 
-                      description: "The combined prompt string. Format: [Subject], [Action], [Environment], [Style], Text: [Typography instruction with Gold Keyword]" 
-                    }
+                    required: ["subject", "action", "environment", "styleAndTech", "typographyInstruction"],
                   },
-                  required: ["id", "breakdown", "fullPrompt"],
+                  fullPrompt: {
+                    type: Type.STRING,
+                    description: "The combined prompt string. Format: [Subject], [Action], [Environment], [Style], Text: [Typography instruction with Gold Keyword]"
+                  }
                 },
+                required: ["id", "breakdown", "fullPrompt"],
               },
             },
-          });
-      
-          const text = response.text;
-          if (!text) throw new Error("No response from Gemini");
-          const parsed = JSON.parse(text);
-          return new Response(JSON.stringify(parsed.map((p: any) => ({ ...p, headline }))));
+          },
+        });
+
+        const text = response.text;
+        if (!text) throw new Error("No response from Gemini");
+        const parsed = JSON.parse(text);
+        return new Response(JSON.stringify(parsed.map((p: any) => ({ ...p, headline }))));
       }
 
       case 'carousel-script': {
-         const { headline } = payload;
-         const response = await ai.models.generateContent({
-             model: "gemini-1.5-flash",
-             contents: `Generate 4 educational carousel slides for the concept: "${headline}"`,
-             config: {
-               systemInstruction: CAROUSEL_SCRIPT_INSTRUCTION,
-               responseMimeType: "application/json",
-               responseSchema: {
-                 type: Type.ARRAY,
-                 items: { type: Type.STRING }
-               }
-             }
-           });
-       
-           const text = response.text;
-           if (!text) throw new Error("No response");
-           return new Response(text); // Already JSON string
+        const { headline } = payload;
+        const response = await ai.models.generateContent({
+          model: "gemini-1.5-flash",
+          contents: `Generate 4 educational carousel slides for the concept: "${headline}"`,
+          config: {
+            systemInstruction: CAROUSEL_SCRIPT_INSTRUCTION,
+            responseMimeType: "application/json",
+            responseSchema: {
+              type: Type.ARRAY,
+              items: { type: Type.STRING }
+            }
+          }
+        });
+
+        const text = response.text;
+        if (!text) throw new Error("No response");
+        return new Response(text); // Already JSON string
       }
 
       case 'carousel-prompts': {
-          const { breakdown, slides } = payload;
-           const inputPayload = {
-               masterStyle: {
-                 environment: breakdown.environment,
-                 styleAndTech: breakdown.styleAndTech,
-                 action: breakdown.action,
-                 subject: breakdown.subject
-               },
-               slides: slides.map((s: any) => s.text)
-             };
-         
-             const response = await ai.models.generateContent({
-               model: "gemini-1.5-flash",
-               contents: `Generate 4 image prompts based on this style and these texts: ${JSON.stringify(inputPayload)}`,
-               config: {
-                 systemInstruction: `
+        const { breakdown, slides } = payload;
+        const inputPayload = {
+          masterStyle: {
+            environment: breakdown.environment,
+            styleAndTech: breakdown.styleAndTech,
+            action: breakdown.action,
+            subject: breakdown.subject
+          },
+          slides: slides.map((s: any) => s.text)
+        };
+
+        const response = await ai.models.generateContent({
+          model: "gemini-1.5-flash",
+          contents: `Generate 4 image prompts based on this style and these texts: ${JSON.stringify(inputPayload)}`,
+          config: {
+            systemInstruction: `
                    **ACT AS:** Visual Consistency AI.
                    **GOAL:** Generate 4 new image prompts that match a Master Style but illustrate specific texts.
                    
@@ -256,33 +256,33 @@ export default async function handler(request: Request) {
                    **OUTPUT:**
                    Return a JSON Array of 4 strings (the full prompts).
                  `,
-                 responseMimeType: "application/json",
-                 responseSchema: {
-                   type: Type.ARRAY,
-                   items: { type: Type.STRING }
-                 }
-               }
-             });
-             return new Response(response.text);
+            responseMimeType: "application/json",
+            responseSchema: {
+              type: Type.ARRAY,
+              items: { type: Type.STRING }
+            }
+          }
+        });
+        return new Response(response.text);
       }
 
       case 'single-carousel-prompt': {
         const { breakdown, slideText } = payload;
         const inputPayloadSingle = {
-            masterStyle: {
-                environment: breakdown.environment,
-                styleAndTech: breakdown.styleAndTech,
-                action: breakdown.action,
-                subject: breakdown.subject
-            },
-            slideText: slideText
+          masterStyle: {
+            environment: breakdown.environment,
+            styleAndTech: breakdown.styleAndTech,
+            action: breakdown.action,
+            subject: breakdown.subject
+          },
+          slideText: slideText
         };
 
         const response = await ai.models.generateContent({
-            model: "gemini-1.5-flash",
-            contents: `Generate 1 image prompt based on this style and text: ${JSON.stringify(inputPayloadSingle)}`,
-            config: {
-                systemInstruction: `
+          model: "gemini-1.5-flash",
+          contents: `Generate 1 image prompt based on this style and text: ${JSON.stringify(inputPayloadSingle)}`,
+          config: {
+            systemInstruction: `
                 **ACT AS:** Visual Consistency AI.
                 **GOAL:** Generate 1 image prompt matching the Master Style for the provided text.
                 **RULES:**
@@ -291,83 +291,78 @@ export default async function handler(request: Request) {
                 3. Include: Text: '${slideText}' Bold Sans-Serif, Gold keywords.
                 4. Output ONLY the raw prompt string.
                 `,
-            }
+          }
         });
         return new Response(JSON.stringify({ prompt: response.text }));
       }
 
       case 'generate-image': {
-          // Server-side image generation (proxied)
-          // We can't return the URL directly if we want to secure the key, so we return base64
-          const { prompt, maxRetries = 3 } = payload;
-          
-          for (let attempt = 0; attempt <= maxRetries; attempt++) {
-            try {
-              console.log(`Generating image attempt ${attempt + 1}/${maxRetries + 1}...`);
-              
-              // Note: Using gemini-2.0-flash-exp (or whichever image model is available/preferred)
-              // The original code used 'gemini-2.5-flash-image'. Is that a valid model ID? 
-              // Usually it's 'gemini-1.5-flash' (which has no image gen) or a specific Imagen model.
-              // However, if the user had it working, I'll stick to their model string as close as possible
-              // or default to a known working one. The user's code had 'gemini-2.5-flash-image'.
-              // I will trust the user's model selection but fallback if needed.
-              // Actually, standard gemini models don't generate images via `generateContent` unless they are multimodal inputs.
-              // Google Gen AI SDK for image generation usually returns base64 in inlineData.
-              // I will use the same model ID they were using.
-              
-              const modelId = 'gemini-2.0-flash-exp'; // 2.5 might not exist yet publicly, defaulting to 2.0-flash-exp which supports visuals? 
-              // Wait, the user had 'gemini-2.5-flash-image'. I'll stick with that if it worked for them, 
-              // but purely to be safe I'll use a string they had.
-              
-              const response = await ai.models.generateContent({
-                model: 'gemini-2.0-flash-exp', // Safest bet for now if 2.5 is hypothetical
-                contents: {
-                  parts: [{ text: prompt }],
-                },
-                config: {
-                  // @ts-ignore - imageConfig might not be in the strict types yet
-                  imageConfig: {
-                     aspectRatio: "1:1" // Only supported on some models
-                  }
-                }
-              });
-        
-              // Check for inline data (Success case)
-              for (const part of response.candidates?.[0]?.content?.parts || []) {
-                if (part.inlineData) {
-                  return new Response(JSON.stringify({ image: `data:image/png;base64,${part.inlineData.data}` }));
+        // Server-side image generation (proxied)
+        const { prompt, maxRetries = 1 } = payload; // REDUCED DEFAULT RETRIES
+
+        // Timeout helper
+        const withTimeout = <T>(promise: Promise<T>, ms: number): Promise<T> => {
+          return Promise.race([
+            promise,
+            new Promise<T>((_, reject) => setTimeout(() => reject(new Error("Timeout")), ms))
+          ]);
+        };
+
+        for (let attempt = 0; attempt <= maxRetries; attempt++) {
+          try {
+            console.log(`Generating image attempt ${attempt + 1}/${maxRetries + 1}...`);
+
+            // Use gemini-2.0-flash-exp but wrap in 25s timeout to let Vercel fail gracefully
+            const response = await withTimeout(ai.models.generateContent({
+              model: 'gemini-2.0-flash-exp',
+              contents: {
+                parts: [{ text: prompt }],
+              },
+              config: {
+                // @ts-ignore
+                imageConfig: {
+                  aspectRatio: "1:1"
                 }
               }
+            }), 25000); // 25s timeout per attempt
 
-              // If no image, check logic...
-              // Actually, since I can't verify model availability, I'll return what I can.
-              throw new Error("No image data found");
-
-            } catch (error: any) {
-               console.error(`Attempt ${attempt + 1} failed:`, error.message);
-               if (attempt === maxRetries) throw error;
-               await wait(2000 * Math.pow(2, attempt)); 
+            // Check for inline data (Success case)
+            for (const part of response.candidates?.[0]?.content?.parts || []) {
+              if (part.inlineData) {
+                return new Response(JSON.stringify({ image: `data:image/png;base64,${part.inlineData.data}` }));
+              }
             }
+
+            throw new Error("No image data found");
+
+          } catch (error: any) {
+            console.error(`Attempt ${attempt + 1} failed:`, error.message);
+
+            if (attempt === maxRetries) throw error;
+
+            // Reduced Wait: 2s, 4s...
+            await wait(2000 * Math.pow(2, attempt));
           }
+        }
       }
 
       case 'social-content': {
-          const { topic, platform } = payload;
-          const systemInstruction = getPlatformInstruction(platform);
-          const response = await ai.models.generateContent({
-            model: "gemini-1.5-flash",
-            contents: `Topic: ${topic}`,
-            config: { systemInstruction }
-          });
-          return new Response(JSON.stringify({ content: response.text }));
+        const { topic, platform } = payload;
+        const systemInstruction = getPlatformInstruction(platform);
+        const response = await ai.models.generateContent({
+          model: "gemini-1.5-flash",
+          contents: `Topic: ${topic}`,
+          config: { systemInstruction }
+        });
+        return new Response(JSON.stringify({ content: response.text }));
       }
-      
+
       case 'refine-content': {
-          const { originalContent, feedback, platform } = payload;
-          const systemInstruction = getPlatformInstruction(platform);
-          const response = await ai.models.generateContent({
-            model: "gemini-1.5-flash",
-            contents: `
+        const { originalContent, feedback, platform } = payload;
+        const systemInstruction = getPlatformInstruction(platform);
+        const response = await ai.models.generateContent({
+          model: "gemini-1.5-flash",
+          contents: `
             ORIGINAL CONTENT:
             ${originalContent}
 
@@ -378,16 +373,16 @@ export default async function handler(request: Request) {
             1. Maintain the formatting rules for the platform (Plain Text vs Markdown).
             2. Return ONLY the new content text. Do not add conversational filler like "Here is the refined text".
             `,
-            config: { systemInstruction }
-          });
-          return new Response(JSON.stringify({ content: response.text }));
+          config: { systemInstruction }
+        });
+        return new Response(JSON.stringify({ content: response.text }));
       }
-      
+
       case 'trending-keywords': {
-         // This relied on googleSearch tool. 
-         const response = await ai.models.generateContent({
-            model: "gemini-2.0-flash-exp", 
-            contents: `Find the top 10 trending news topics and keywords in Cryptocurrency, Bitcoin, and Blockchain happening right now.
+        // This relied on googleSearch tool. 
+        const response = await ai.models.generateContent({
+          model: "gemini-2.0-flash-exp",
+          contents: `Find the top 10 trending news topics and keywords in Cryptocurrency, Bitcoin, and Blockchain happening right now.
             
             RETURN FORMAT:
             You MUST return a VALID JSON string (and nothing else) with this exact structure:
@@ -396,42 +391,42 @@ export default async function handler(request: Request) {
             ]
             
             Do not include markdown backticks or explanations. Just the JSON.`,
-            config: {
-              tools: [{ googleSearch: {} }],
+          config: {
+            tools: [{ googleSearch: {} }],
+          }
+        });
+
+        const text = response.text || "[]";
+        const jsonString = text.replace(/```json\n?|\n?```/g, '').trim();
+
+        // Grounding metadata
+        const sources: Array<{ title: string, uri: string }> = [];
+        if (response.candidates?.[0]?.groundingMetadata?.groundingChunks) {
+          response.candidates[0].groundingMetadata.groundingChunks.forEach((chunk: any) => {
+            if (chunk.web) {
+              sources.push({ title: chunk.web.title, uri: chunk.web.uri });
             }
           });
-          
-         const text = response.text || "[]";
-         const jsonString = text.replace(/```json\n?|\n?```/g, '').trim();
-         
-         // Grounding metadata
-         const sources: Array<{title: string, uri: string}> = [];
-         if (response.candidates?.[0]?.groundingMetadata?.groundingChunks) {
-             response.candidates[0].groundingMetadata.groundingChunks.forEach((chunk: any) => {
-                 if (chunk.web) {
-                     sources.push({ title: chunk.web.title, uri: chunk.web.uri });
-                 }
-             });
-         }
-         return new Response(JSON.stringify({ trends: JSON.parse(jsonString), sources }));
+        }
+        return new Response(JSON.stringify({ trends: JSON.parse(jsonString), sources }));
       }
 
       case 'viral-hooks': {
-          const response = await ai.models.generateContent({
-              model: "gemini-1.5-flash",
-              contents: `Generate 15 highly engaging, short "Hooks" or "Titles" for Crypto/Finance content.
+        const response = await ai.models.generateContent({
+          model: "gemini-1.5-flash",
+          contents: `Generate 15 highly engaging, short "Hooks" or "Titles" for Crypto/Finance content.
               They should be punchy, alpha-focused, and suitable for visual headlines.
               Examples: "Silence is Golden", "Bear Market Builder", "Trust the Code", "Money is Energy".
               Return ONLY a JSON array of strings.`,
-              config: {
-                responseMimeType: "application/json",
-                responseSchema: {
-                  type: Type.ARRAY,
-                  items: { type: Type.STRING }
-                }
-              }
-            });
-            return new Response(response.text);
+          config: {
+            responseMimeType: "application/json",
+            responseSchema: {
+              type: Type.ARRAY,
+              items: { type: Type.STRING }
+            }
+          }
+        });
+        return new Response(response.text);
       }
 
       default:
