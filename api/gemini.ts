@@ -126,23 +126,19 @@ const getPlatformInstruction = (platform: string): string => {
   }
 };
 
-export default async function handler(request: Request) {
-  if (request.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers: { 'Content-Type': 'application/json' },
-    });
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
   if (!API_KEY) {
-    return new Response(JSON.stringify({ error: 'Server configuration error: GEMINI_API_KEY is missing.' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return res.status(500).json({ error: 'Server configuration error: GEMINI_API_KEY is missing.' });
   }
 
   try {
-    const { action, payload } = await request.json();
+    const { action, payload } = req.body;
     const ai = new GoogleGenAI({ apiKey: API_KEY });
 
     switch (action) {
@@ -200,7 +196,7 @@ export default async function handler(request: Request) {
         const text = response.text;
         if (!text) throw new Error("No response from Gemini");
         const parsed = JSON.parse(text);
-        return new Response(JSON.stringify(parsed.map((p: any) => ({ ...p, headline }))));
+        return res.status(200).json(parsed.map((p: any) => ({ ...p, headline })));
       }
 
       case 'carousel-script': {
@@ -220,7 +216,7 @@ export default async function handler(request: Request) {
 
         const text = response.text;
         if (!text) throw new Error("No response");
-        return new Response(text); // Already JSON string
+        return res.status(200).json(JSON.parse(text));
       }
 
       case 'carousel-prompts': {
@@ -263,7 +259,7 @@ export default async function handler(request: Request) {
             }
           }
         });
-        return new Response(response.text);
+        return res.status(200).json(JSON.parse(response.text || "[]"));
       }
 
       case 'single-carousel-prompt': {
@@ -293,7 +289,7 @@ export default async function handler(request: Request) {
                 `,
           }
         });
-        return new Response(JSON.stringify({ prompt: response.text }));
+        return res.status(200).json({ prompt: response.text });
       }
 
       case 'generate-image': {
@@ -329,7 +325,7 @@ export default async function handler(request: Request) {
             // Check for inline data (Success case)
             for (const part of response.candidates?.[0]?.content?.parts || []) {
               if (part.inlineData) {
-                return new Response(JSON.stringify({ image: `data:image/png;base64,${part.inlineData.data}` }));
+                return res.status(200).json({ image: `data:image/png;base64,${part.inlineData.data}` });
               }
             }
 
@@ -344,6 +340,8 @@ export default async function handler(request: Request) {
             await wait(2000 * Math.pow(2, attempt));
           }
         }
+        // Fallback if loop completes without return
+        throw new Error("Failed to generate image after retries");
       }
 
       case 'social-content': {
@@ -354,7 +352,7 @@ export default async function handler(request: Request) {
           contents: `Topic: ${topic}`,
           config: { systemInstruction }
         });
-        return new Response(JSON.stringify({ content: response.text }));
+        return res.status(200).json({ content: response.text });
       }
 
       case 'refine-content': {
@@ -375,7 +373,7 @@ export default async function handler(request: Request) {
             `,
           config: { systemInstruction }
         });
-        return new Response(JSON.stringify({ content: response.text }));
+        return res.status(200).json({ content: response.text });
       }
 
       case 'trending-keywords': {
@@ -408,7 +406,7 @@ export default async function handler(request: Request) {
             }
           });
         }
-        return new Response(JSON.stringify({ trends: JSON.parse(jsonString), sources }));
+        return res.status(200).json({ trends: JSON.parse(jsonString), sources });
       }
 
       case 'viral-hooks': {
@@ -426,18 +424,15 @@ export default async function handler(request: Request) {
             }
           }
         });
-        return new Response(response.text);
+        return res.status(200).json(JSON.parse(response.text || "[]"));
       }
 
       default:
-        return new Response(JSON.stringify({ error: 'Invalid action' }), { status: 400 });
+        return res.status(400).json({ error: 'Invalid action' });
     }
 
   } catch (error: any) {
     console.error("API Error:", error);
-    return new Response(JSON.stringify({ error: error.message || "Internal Server Error" }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return res.status(500).json({ error: error.message || "Internal Server Error" });
   }
 }
