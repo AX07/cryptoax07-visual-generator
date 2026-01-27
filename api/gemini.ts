@@ -145,7 +145,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       case 'design-prompts': {
         const { headline } = payload;
         const response = await ai.models.generateContent({
-          model: "gemini-1.5-flash", // Reverting to stable 1.5-flash from preview
+          model: "gemini-1.5-flash-001", // FIXED: Use explicit 001 version
           contents: `Generate 3 visual master prompts for the headline: "${headline}"`,
           config: {
             systemInstruction: SYSTEM_INSTRUCTION,
@@ -202,7 +202,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       case 'carousel-script': {
         const { headline } = payload;
         const response = await ai.models.generateContent({
-          model: "gemini-1.5-flash",
+          model: "gemini-1.5-flash-001",
           contents: `Generate 4 educational carousel slides for the concept: "${headline}"`,
           config: {
             systemInstruction: CAROUSEL_SCRIPT_INSTRUCTION,
@@ -232,7 +232,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         };
 
         const response = await ai.models.generateContent({
-          model: "gemini-1.5-flash",
+          model: "gemini-1.5-flash-001",
           contents: `Generate 4 image prompts based on this style and these texts: ${JSON.stringify(inputPayload)}`,
           config: {
             systemInstruction: `
@@ -275,7 +275,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         };
 
         const response = await ai.models.generateContent({
-          model: "gemini-1.5-flash",
+          model: "gemini-1.5-flash-001",
           contents: `Generate 1 image prompt based on this style and text: ${JSON.stringify(inputPayloadSingle)}`,
           config: {
             systemInstruction: `
@@ -348,7 +348,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const { topic, platform } = payload;
         const systemInstruction = getPlatformInstruction(platform);
         const response = await ai.models.generateContent({
-          model: "gemini-1.5-flash",
+          model: "gemini-1.5-flash-001",
           contents: `Topic: ${topic}`,
           config: { systemInstruction }
         });
@@ -359,7 +359,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const { originalContent, feedback, platform } = payload;
         const systemInstruction = getPlatformInstruction(platform);
         const response = await ai.models.generateContent({
-          model: "gemini-1.5-flash",
+          model: "gemini-1.5-flash-001",
           contents: `
             ORIGINAL CONTENT:
             ${originalContent}
@@ -411,7 +411,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       case 'viral-hooks': {
         const response = await ai.models.generateContent({
-          model: "gemini-1.5-flash",
+          model: "gemini-1.5-flash-001",
           contents: `Generate 15 highly engaging, short "Hooks" or "Titles" for Crypto/Finance content.
               They should be punchy, alpha-focused, and suitable for visual headlines.
               Examples: "Silence is Golden", "Bear Market Builder", "Trust the Code", "Money is Energy".
@@ -436,3 +436,4 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({ error: error.message || "Internal Server Error" });
   }
 }
+
